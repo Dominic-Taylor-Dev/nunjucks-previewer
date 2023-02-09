@@ -1,0 +1,3 @@
+[submodule "server/di-authentication-frontend"]
+	path = server/di-authentication-frontend
+	url = https://github.com/alphagov/di-authentication-frontend.git
