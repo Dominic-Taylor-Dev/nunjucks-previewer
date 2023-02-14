@@ -1,4 +1,7 @@
 # Logs
+di-authentication*
+
+# Logs
 logs
 *.log
 npm-debug.log*

@@ -4,8 +4,8 @@ import { AppBar, Toolbar, Typography } from "@material-ui/core";
 const Header = () => (
   <AppBar position="static">
     <Toolbar>
-      <Typography variant="h6">
-        Nunjucks previewer: Authentication Front End
+      <Typography variant="h5">
+        Authentication Front End: Nunjucks Previewer
       </Typography>
     </Toolbar>
   </AppBar>

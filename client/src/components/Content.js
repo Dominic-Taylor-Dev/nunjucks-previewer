@@ -4,18 +4,35 @@ import {
   Button,
   TextField,
   Box,
-  FormControlLabel,
   Grid,
-  Link,
-  Checkbox,
+  Typography,
 } from "@material-ui/core";
 import React, { useContext, useEffect, useState } from "react";
 import { SelectedLinkContext } from "./Layout";
+
+const injectVarsAsFormInputs = (vars) => {
+  return Object.entries(vars).map((keyValuePair, index) => {
+    console.log(keyValuePair);
+    const [key, value] = keyValuePair;
+    return (
+      <input
+        readOnly
+        key={index}
+        id={key}
+        name={key}
+        value={value || "undefined"}
+      />
+    );
+  });
+};
 
 const Content = () => {
   const { selectedNjkViewObject } = useContext(SelectedLinkContext);
 
   const [fileVariableOverrides, setFileVariableOverrides] = useState({});
+
+  const displayEnglish = true;
+  const displayWelsh = true;
 
   useEffect(() => {
     const defaultFileVariables = {};
@@ -30,8 +47,16 @@ const Content = () => {
       "english-lang-preview-post-form"
     );
 
-    if (englishLanguageIFrameForm) {
+    const welshLanguageIFrameForm = document.getElementById(
+      "welsh-lang-preview-post-form"
+    );
+
+    if (englishLanguageIFrameForm && displayEnglish) {
       englishLanguageIFrameForm.submit();
+    }
+
+    if (welshLanguageIFrameForm && displayWelsh) {
+      welshLanguageIFrameForm.submit();
     }
   }, [selectedNjkViewObject, fileVariableOverrides]);
 
@@ -50,7 +75,6 @@ const Content = () => {
   const iFrameStyle = {
     borderStyle: "solid",
     height: "90vh",
-    width: "48%",
   };
 
   const handleSubmit = (event) => {
@@ -72,6 +96,9 @@ const Content = () => {
 
   return (
     <Grid container direction="row" spacing={3}>
+      <Typography variant="h5" sx={{ fontSize: 16 }}>
+        {selectedNjkViewObject.filePath}
+      </Typography>
       <Grid item xs={12}>
         <FileVariablesBox
           fileVariables={fileVariableOverrides}
@@ -80,44 +107,49 @@ const Content = () => {
       </Grid>
       <Grid item xs={12}>
         <form
+          id="welsh-lang-preview-post-form"
+          target="welsh-lang-preview"
+          action={`http://localhost:5000/${selectedLink}?lng=cy`}
+          method="post"
+          style={{ display: "none" }}
+        >
+          {injectVarsAsFormInputs(fileVariableOverrides)}
+        </form>
+        <form
           id="english-lang-preview-post-form"
           target="english-lang-preview"
           action={`http://localhost:5000/${selectedLink}?lng=en`}
           method="post"
           style={{ display: "none" }}
         >
-          {Object.entries(fileVariableOverrides).map((keyValuePair) => {
-            console.log(keyValuePair);
-            const [key, value] = keyValuePair;
-            return (
-              <input
-                readOnly
-                id={key}
-                name={key}
-                value={value || "undefined"}
-              />
-            );
-          })}
-
-          <input type="submit" />
+          {injectVarsAsFormInputs(fileVariableOverrides)}
         </form>
 
-        <div className="side-by-side-en-cy" style={{ position: "relative" }}>
+        {displayEnglish && (
           <iframe
             src=""
-            style={{ ...iFrameStyle, float: "left" }}
+            style={{
+              ...iFrameStyle,
+              float: "left",
+              width: displayWelsh ? "48%" : "100%",
+            }}
             title="english-lang-preview"
             name="english-lang-preview"
           />
+        )}
 
-          {/* TODO: make this use POST not GET */}
+        {displayWelsh && (
           <iframe
-            src={`http://localhost:5000/${selectedLink}?lng=cy`}
-            style={{ ...iFrameStyle, float: "right" }}
+            src=""
+            style={{
+              ...iFrameStyle,
+              float: "right",
+              width: displayEnglish ? "48%" : "100%",
+            }}
             title="welsh-lang-preview"
             name="welsh-lang-preview"
           />
-        </div>
+        )}
       </Grid>
     </Grid>
   );
@@ -130,9 +162,11 @@ const FileVariablesBox = ({ fileVariables, handleSubmit }) => {
   return fileVariableKeys.length ? (
     <>
       <Card variant="outlined">
-        The following fields represent possible variables that can be passed
-        into the template. All are optional. Some may affect layout, whereas
-        others are just strings which get interpolated:
+        <Typography variant="body1">
+          The following fields represent possible variables that can be passed
+          into the template. All are optional. Some may affect layout, whereas
+          others are just strings which get interpolated:
+        </Typography>
       </Card>
 
       {/* TODO: fix bug where only one field works per page. */}
@@ -164,6 +198,10 @@ const FileVariablesBox = ({ fileVariables, handleSubmit }) => {
       </Box>
     </>
   ) : (
-    <Paper>This file has no detected variables to change</Paper>
+    <Card variant="outlined">
+      <Typography variant="body1">
+        This file has no detected variables to change
+      </Typography>
+    </Card>
   );
 };
